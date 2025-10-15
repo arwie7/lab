@@ -1,0 +1,31 @@
+import re
+
+digits_in_words = {
+    '0': 'ноль', '2': 'два', '4': 'четыре', '6': 'шесть', '8': 'восемь'
+}
+
+def process_stream(filename):
+    with open(filename, 'r') as file:
+        content = file.read()
+        data = re.findall(r'\d+', content)
+
+    for num_str in data:
+        if num_str.isdigit():
+            num = int(num_str)
+            if 1 <= num <= 999999:
+                s = str(num)
+                if len(s) >= 5:
+                    idx = len(s) - 5
+                    if s[idx] == '7':
+                        print("Число:", num)
+                        right_digits = s[idx+1:]
+                        even_words = []
+                        for digit in right_digits:
+                            if digit in digits_in_words:
+                                even_words.append(digits_in_words[digit])
+                        if even_words:
+                            print("Чётные цифры справа прописью:", ' '.join(even_words))
+                        else:
+                            print("Чётных цифр справа нет")
+
+process_stream("1lab.txt")
