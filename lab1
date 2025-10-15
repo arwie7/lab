@@ -4,27 +4,27 @@ digits_in_words = {
     '8': 'восемь', '9': 'девять'
 }
 
-def process_number(num):
-    s = str(num)
-    length = len(s)
-    if length < 5:
-        return
-    
-    fifth_from_right_index = length - 5
-    if s[fifth_from_right_index] == '7':
-        print("Число:", num)
-        right_digits = s[fifth_from_right_index + 1:]
-        even_digits_words = []
-        for digit in right_digits:
-            if int(digit) % 2 == 0:
-                even_digits_words.append(digits_in_words[digit])
-        if even_digits_words:
-            print("Чётные цифры справа от пятой справа цифры 7:")
-            print(" ".join(even_digits_words))
-        else:
-            print("Чётных цифр справа нет")
+def process_stream(filename):
+    with open(filename, 'r') as file:
+        data = file.read().split()
 
-numbers = [172345, 712345, 700007, 1234567, 975312, 770007]
+    for num_str in data:
+        if num_str.isdigit():
+            s = num_str
+            length = len(s)
+            if length >= 5:
+                fifth_from_right_index = length - 5
+                if s[fifth_from_right_index] == '7':
+                    print("Число:", s)
+                    right_digits = s[fifth_from_right_index + 1:]
+                    even_digits_words = []
+                    for digit in right_digits:
+                        if int(digit) % 2 == 0:
+                            even_digits_words.append(digits_in_words[digit])
+                    if even_digits_words:
+                        print("Чётные цифры справа от пятой справа цифры 7:")
+                        print(" ".join(even_digits_words))
+                    else:
+                        print("Чётных цифр справа нет")
 
-for number in numbers:
-    process_number(number)
+process_stream("1lab.txt")
