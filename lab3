@@ -1,0 +1,70 @@
+def process_stream(filename):
+    with open(filename, 'r') as file:
+        data = file.read().split()
+    data = list(map(int, data))
+    N = data[0]
+    K = data[1]
+    A = []
+    idx = 2
+    for i in range(N):
+        A.append(data[idx:idx+N])
+        idx += N
+
+    def print_matrix(m, name):
+        print(f"\n{name}:")
+        for row in m:
+            print(" ".join(f"{x:4}" for x in row))
+
+    def transpose(m):
+        return [list(row) for row in zip(*m)]
+
+    def get_cross_regions(n):
+        q = n // 4
+        half = n // 2
+        area1 = [(i, j) for i in range(q) for j in range(q, 3 * q)]
+        area2 = [(i, j) for i in range(q, 3 * q) for j in range(3 * q, n)]
+        area3 = [(i, j) for i in range(half, n) for j in range(q, 3 * q)]
+        area4 = [(i, j) for i in range(q, 3 * q) for j in range(0, q)]
+        return area1, area2, area3, area4
+
+    def build_F(A):
+        n = len(A)
+        F = [row[:] for row in A]
+        area1, area2, area3, area4 = get_cross_regions(n)
+        pos_count = sum(1 for (i, j) in area2 if j % 2 == 1 and F[i][j] > 0)
+        neg_count = sum(1 for (i, j) in area4 if j % 2 == 0 and F[i][j] < 0)
+        if pos_count > neg_count:
+            for idx in range(len(area3)):
+                i3, j3 = area3[idx]
+                i4, j4 = area4[idx]
+                F[i3][j3], F[i4][j4] = F[i4][j4], F[i3][j3]
+        else:
+            for idx in range(len(area2)):
+                i2, j2 = area2[idx]
+                i3, j3 = area3[idx]
+                F[i2][j2], F[i3][j3] = F[i3][j3], F[i2][j2]
+        return F
+
+    def add_matrices(A, B):
+        n = len(A)
+        return [[A[i][j] + B[i][j] for j in range(n)] for i in range(n)]
+
+    def scalar_mult_matrix(K, M):
+        n = len(M)
+        return [[K * M[i][j] for j in range(n)] for i in range(n)]
+
+    def multiply_matrices(A, B):
+        n = len(A)
+        return [[sum(A[i][k] * B[k][j] for k in range(n)) for j in range(n)] for i in range(n)]
+
+    def subtract_matrices(A, B):
+        n = len(A)
+        return [[A[i][j] - B[i][j] for j in range(n)] for i in range(n)]
+
+    print_matrix(A, "Исходная A")
+    F = build_F(A)
+    print_matrix(F, "Модифицированная F")
+    Result = subtract_matrices(multiply_matrices(add_matrices(F, A), transpose(A)), scalar_mult_matrix(K, F))
+    print_matrix(Result, "Результат (F+A)*AT - K*F")
+
+process_stream("1lab.txt")
