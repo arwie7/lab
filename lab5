@@ -68,3 +68,67 @@ if __name__ == '__main__':
         print("Пример оптимального массива:", optimal[0] , "sum ⩽ 8")
 
 
+
+#Сгенерировать все возможные варианты одномерного массива (K) из чисел 0, 1, 2 и 3.
+import timeit
+from itertools import product
+
+def algorithmic_method(K):
+    result = [[]]
+    for i in range(K):
+        temp = []
+        for arr in result:
+            for d in (0,1,2,3):
+                temp.append(arr + [d])
+        result = temp
+    return result
+
+def python_method(K):
+    return [list(p) for p in product((0,1,2,3), repeat=K)]
+
+def optimized_method(K, max_sum):
+    candidates = [list(p) for p in product((0,1,2,3), repeat=K) if sum(p) <= max_sum]
+    if not candidates:
+        return []
+    max_s = max(sum(arr) for arr in candidates)
+    return [arr for arr in candidates if sum(arr) == max_s]
+
+if __name__ == '__main__':
+    K = 4
+    max_sum = 2 * K
+
+    # ЧАСТЬ 1: ОБА МЕТОДА по всем K=1..4
+    print("Методы формирования массивов:\n")
+    for k in range(1, 5):
+        print(f"\n{'='*50}")
+        print(f"K={k}")
+        print('='*50)
+        
+        # АЛГОРИТМИЧЕСКИЙ
+        alg = algorithmic_method(k)  # ← БЫЛО K, стало k!
+        print(f"Алг-метод (первые 10 из {len(alg)}):")
+        for arr in alg[:10]:
+            print(arr)
+        
+        # PYTHON
+        py = python_method(k)        # ← БЫЛО K, стало k!
+        print(f"Python-метод (первые 10 из {len(py)}):")
+        for arr in py[:10]:
+            print(arr)
+        print()
+
+    # СРАВНЕНИЕ СКОРОСТИ (K=4)
+    t_alg = timeit.timeit(lambda: algorithmic_method(K), number=100)
+    t_py  = timeit.timeit(lambda: python_method(K), number=100)
+    print(f"Скорость K=4 (100 повторов): algorithmic={t_alg:.4f}s, python={t_py:.4f}s\n")
+
+    # ЧАСТЬ 2: ОПТИМИЗАЦИЯ
+    optimal = optimized_method(K, max_sum)
+    print("Оптимальные массивы (max sum при sum≤8):")
+    for i, arr in enumerate(optimal, start=1):
+        end_char = ", " if i % 5 != 0 and i != len(optimal) else "\n"
+        print(arr, end=end_char)
+    print(f"\nКоличество оптимальных: {len(optimal)}")
+    if optimal:
+        print("Пример:", optimal[0], "sum=8")
+
