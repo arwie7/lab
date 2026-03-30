@@ -17,7 +17,6 @@ def python_method(K):
     return [list(p) for p in product((0, 1, 2, 3), repeat=K)]
 
 
-# НОВЫЙ метод: только неубывающие массивы (убираем все убывающие последовательности)
 def non_decreasing_method(K):
     result = []
 
@@ -28,7 +27,6 @@ def non_decreasing_method(K):
 
         for d in (0, 1, 2, 3):
             if last is not None and d < last:
-                # это бы сделало последовательность убывающей — отсекаем ветку
                 continue
             arr.append(d)
             backtrack(pos + 1, arr, d)
@@ -73,7 +71,6 @@ if __name__ == '__main__':
     t_py = timeit.timeit(lambda: python_method(K), number=100)
     print(f"Скорость K=4 (100 повторов): algorithmic={t_alg:.4f}s, python={t_py:.4f}s\n")
 
-    # используем новый метод вместо ограничения по сумме
     nd = non_decreasing_method(K)
     print("Неубывающие массивы длины K:")
     for i, arr in enumerate(nd, start=1):
