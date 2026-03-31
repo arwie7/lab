@@ -1,3 +1,4 @@
+#F(n<5)=10;F(n)= (-1)n*(5F(n-1)-7(n-2)+F(n//5)/(2n)!)(при n >12), F(n)=F(n-2)-F(n-1) (при 5<n<=12)
 import math
 import timeit
 import pandas as pd
