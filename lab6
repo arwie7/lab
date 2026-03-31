@@ -50,7 +50,6 @@ for n in range(0, 21):
 df = pd.DataFrame(results, columns=['n', 'Recursive Value', 'Iterative Value', 'Recursive Time (s)', 'Iterative Time (s)'])
 pd.set_option("display.float_format", lambda x: f"{x:10.4f}")
 pd.set_option("display.max_columns", None)
-print("Лаб. работа №6 Лаптев Никита ИСТбд-12\n")
 print(df)
 
 # Построение графика времени выполнения
@@ -58,4 +57,8 @@ plt.figure(figsize=(10, 6))
 plt.plot(df['n'], df['Recursive Time (s)'], label='Recursive', linestyle='--')
 plt.plot(df['n'], df['Iterative Time (s)'], label='Iterative', linestyle='-')
 plt.xlabel('n')
-plt.ylabe
+plt.ylabel('Time (s)')
+plt.title('Сравнение времени: рекурсия vs итерация')
+plt.legend()
+plt.grid(True)
+plt.show()
