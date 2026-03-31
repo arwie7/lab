@@ -1,0 +1,57 @@
+import math
+import timeit
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def F_recursive(n: int) -> float:
+    if n < 5:
+        return 10
+    elif 5 < n <= 12:
+        return F_recursive(n-2) - F_recursive(n-1)
+    elif n == 5:
+        return 10
+    else:
+        sign = 1 if n % 2 == 0 else -1
+        return sign * (5 * F_recursive(n-1) - 7 * F_recursive(n-2) + F_recursive(n // 5)) / math.factorial(2 * n)
+
+def F_iterative(n: int) -> float:
+    F = [0.0] * (n + 1)
+
+    for i in range(n + 1):
+        if i < 5:
+            F[i] = 10
+        elif i <= 12:
+            F[i] = F[i-2] - F[i-1]
+        else:
+            sign = 1 if i % 2 == 0 else -1
+            F[i] = sign * (5 * F[i-1] - 7 * F[i-2] + F[i // 5]) / math.factorial(2 * i)
+
+    return F[n]
+
+results = []
+for n in range(2, 21):
+    value_r = F_recursive(n)
+    value_i = F_iterative(n)
+    time_r = timeit.timeit(lambda n=n: F_recursive(n), number=10)
+    time_i = timeit.timeit(lambda n=n: F_iterative(n), number=10)
+    results.append((n, value_r, value_i, time_r, time_i))
+
+df = pd.DataFrame(
+    results,
+    columns=['n', 'Recursive Value', 'Iterative Value', 'Recursive Time (s)', 'Iterative Time (s)']
+)
+
+print(df.to_string(index=False))
+
+df.to_csv('variant12_results.csv', index=False)
+
+plt.figure(figsize=(9, 5))
+plt.plot(df['n'], df['Recursive Time (s)'], '--o', label='Recursive')
+plt.plot(df['n'], df['Iterative Time (s)'], '-o', label='Iterative')
+plt.xlabel('n')
+plt.ylabel('Time (s)')
+plt.title('Вариант 12: рекурсия vs итерация')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
