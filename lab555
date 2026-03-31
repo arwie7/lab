@@ -1,0 +1,96 @@
+import timeit
+from itertools import product
+
+
+def algorithmic_method(K):
+    result = [[]]
+    for i in range(K):
+        temp = []
+        for arr in result:
+            for d in (0, 1, 2, 3):
+                temp.append(arr + [d])
+        result = temp
+    return result
+
+
+def python_method(K):
+    return [list(p) for p in product((0, 1, 2, 3), repeat=K)]
+
+
+# РЕАЛЬНОЕ ограничение перебора:
+# строим только те массивы, у которых сумма элементов <= limit
+# если текущая сумма уже больше limit, ветка сразу отсекается
+def limited_sum_method(K, limit):
+    result = []
+
+    def backtrack(pos, arr, current_sum):
+        if current_sum > limit:
+            return
+
+        if pos == K:
+            result.append(arr.copy())
+            return
+
+        for d in (0, 1, 2, 3):
+            if current_sum + d <= limit:
+                arr.append(d)
+                backtrack(pos + 1, arr, current_sum + d)
+                arr.pop()
+
+    backtrack(0, [], 0)
+    return result
+
+
+if __name__ == '__main__':
+    K = 4
+    LIMIT = 5
+
+    print("Все массивы по длине K:")
+    for k in range(1, 5):
+        py_k = python_method(k)
+        print(f"\nK={k} (всего {len(py_k)}):")
+
+        for i in range(0, len(py_k), 8):
+            line = py_k[i:i + 8]
+            print(", ".join(f"{{{','.join(map(str, arr))}}}" for arr in line))
+
+    print("\nМетоды формирования массивов:\n")
+    for k in range(1, 5):
+        print("=" * 50)
+        print(f"K={k}")
+        print("=" * 50)
+
+        alg = algorithmic_method(k)
+        print(f"Алгоритмический метод (первые 10 из {len(alg)}):")
+        for arr in alg[:10]:
+            print(arr)
+
+        py = python_method(k)
+        print(f"\nPython-метод (первые 10 из {len(py)}):")
+        for arr in py[:10]:
+            print(arr)
+
+        limited = limited_sum_method(k, LIMIT)
+        print(f"\nС ограничением суммы <= {LIMIT} (первые 10 из {len(limited)}):")
+        for arr in limited[:10]:
+            print(arr)
+
+        print()
+
+    t_alg = timeit.timeit(lambda: algorithmic_method(K), number=100)
+    t_py = timeit.timeit(lambda: python_method(K), number=100)
+    t_lim = timeit.timeit(lambda: limited_sum_method(K, LIMIT), number=100)
+
+    print(f"Скорость для K={K}, 100 повторов:")
+    print(f"algorithmic_method = {t_alg:.4f} s")
+    print(f"python_method      = {t_py:.4f} s")
+    print(f"limited_sum_method = {t_lim:.4f} s")
+
+    print(f"\nМассивы длины {K} с ограничением суммы <= {LIMIT}:")
+    limited_arrays = limited_sum_method(K, LIMIT)
+
+    for i, arr in enumerate(limited_arrays, start=1):
+        end_char = ", " if i % 5 != 0 and i != len(limited_arrays) else "\n"
+        print(arr, end=end_char)
+
+    print(f"\nКоличество массивов с ограничением: {len(limited_arrays)}")
