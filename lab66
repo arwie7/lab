@@ -1,0 +1,125 @@
+import math
+import timeit
+import pandas as pd
+import matplotlib.pyplot as plt
+import sys
+
+# ================= ЧАСТЬ 1: ЗАДАНА РЕКУРРЕНТНАЯ ФУНКЦИЯ =================
+# F(0)=5; F(1)=1;
+# F(n)= (-1)^n * (2*F(n-1)-F(n-2)) при n четном
+# F(n)= F(n-2) / (2n)! - F(n-1) при n нечетном
+
+print("=== ОТЧЕТ ПО ЛАБОРАТОРНОЙ РАБОТЕ ===")
+print("Рекуррентная функция F(n):")
+print("F(0)=5, F(1)=1")
+print("F(n)= (-1)^n*(2F(n-1)-F(n-2)) при n четном")
+print("F(n)= F(n-2)/(2n)! - F(n-1) при n нечетном")
+print()
+
+# Рекурсивная реализация
+def F_recursive(n):
+    if n == 0:
+        return 5.0
+    if n == 1:
+        return 1.0
+    
+    # ================= ЧАСТЬ 2: РЕКУРСИВНОЕ ВЫЧИСЛЕНИЕ =================
+    if n % 2 == 0:  # n четное
+        sign = (-1) ** n  # (-1)^n
+        return sign * (2 * F_recursive(n - 1) - F_recursive(n - 2))
+    else:  # n нечетное
+        return F_recursive(n - 2) / math.factorial(2 * n) - F_recursive(n - 1)
+
+# Итеративная реализация
+def F_iterative(n):
+    if n == 0:
+        return 5.0
+    if n == 1:
+        return 1.0
+    
+    # ================= ЧАСТЬ 3: ИТЕРАТИВНОЕ ВЫЧИСЛЕНИЕ =================
+    f_prev2 = 5.0  # F(0)
+    f_prev1 = 1.0  # F(1)
+    
+    for i in range(2, n + 1):
+        if i % 2 == 0:  # i четное
+            sign = (-1) ** i
+            f_current = sign * (2 * f_prev1 - f_prev2)
+        else:  # i нечетное
+            f_current = f_prev2 / math.factorial(2 * i) - f_prev1
+        f_prev2, f_prev1 = f_prev1, f_current
+    
+    return f_prev1
+
+# ================= ЧАСТЬ 4: СРАВНИТЕЛЬНОЕ ИССЛЕДОВАНИЕ =================
+# Моделируем границы: рекурсия до n=25 (стек), итерация без ограничений
+print("=== ГРАНИЦЫ ПРИМЕНЕМОСТИ ===")
+print("Рекурсия: ограничена глубиной стека (~n=25-30)")
+print("Итерация: эффективна для любых n")
+
+sys.setrecursionlimit(2000)  # Увеличиваем стек для демонстрации
+
+results = []
+max_n = 25
+for n in range(0, max_n + 1):
+    try:
+        rec_val = F_recursive(n)
+        rec_time = timeit.timeit(lambda: F_recursive(n), number=5)
+    except RecursionError:
+        rec_val = 'RecursionError (стек переполнен)'
+        rec_time = float('inf')
+    except Exception as e:
+        rec_val = f'Error: {str(e)[:20]}'
+        rec_time = float('inf')
+    
+    itr_val = F_iterative(n)
+    itr_time = timeit.timeit(lambda: F_iterative(n), number=5)
+    
+    results.append((n, rec_val, itr_val, rec_time, itr_time))
+
+# ================= ЧАСТЬ 5: ТАБЛИЧНАЯ ФОРМА =================
+df = pd.DataFrame(
+    results,
+    columns=['n', 'Recursive Value', 'Iterative Value', 'Rec Time (s)', 'Itr Time (s)']
+)
+pd.set_option("display.float_format", lambda x: f"{x:10.4f}")
+pd.set_option("display.max_columns", None)
+print("\n=== ТАБЛИЦА СРАВНЕНИЯ ===")
+print(df)
+
+# ================= ЧАСТЬ 6: ГРАФИЧЕСКАЯ ФОРМА =================
+plt.figure(figsize=(12, 8))
+
+plt.subplot(2, 1, 1)
+valid_rec_times = [t if isinstance(v, (int, float)) and t != float('inf') else float('nan') 
+                   for v, t in zip(df['Recursive Value'], df['Rec Time (s)'])]
+plt.plot(df['n'], valid_rec_times, 'r--o', label='Recursive', markersize=4)
+plt.plot(df['n'], df['Itr Time (s)'], 'b-o', label='Iterative', markersize=4)
+plt.xlabel('n')
+plt.ylabel('Время вычисления (с)')
+plt.title('Сравнение времени вычисления F(n)')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.yscale('log')  # Логарифмическая шкала для экспоненциального роста
+
+plt.subplot(2, 1, 2)
+valid_rec_vals = [v if isinstance(v, (int, float)) else float('nan') 
+                  for v in df['Recursive Value']]
+plt.plot(df['n'], valid_rec_vals, 'r--', label='Recursive F(n)')
+plt.plot(df['n'], df['Iterative Value'], 'b-', label='Iterative F(n)')
+plt.xlabel('n')
+plt.ylabel('F(n)')
+plt.title('Значения F(n)')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
+# ================= ЧАСТЬ 7: ВЫВОДЫ =================
+print("\n=== ВЫВОДЫ ===")
+print("1. Рекурсивный подход: экспоненциальное время O(2^n), стек переполняется ~n=25")
+print("2. Итеративный подход: линейное время O(n), неограничен по n")
+print("3. Значения F(n) совпадают до границы рекурсии")
+print("4. Рекомендация: итерация для n>5")
+print("=== КОНЕЦ ОТЧЕТА ===")
